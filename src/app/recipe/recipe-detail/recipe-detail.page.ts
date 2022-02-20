@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
+import { GlobalService } from 'src/app/utils/global.service';
 
 import { Recipe } from 'src/app/interfaces/recipe';
 import { RecipeService } from 'src/app/services/recipe.service';
@@ -17,37 +18,38 @@ export class RecipeDetailPage implements OnInit {
     private activatedRoute: ActivatedRoute,
     private recipeService: RecipeService,
     private router: Router,
-    private alertCtrl: AlertController
+    private globalService: GlobalService
   ) {}
 
   ngOnInit() {
     this.activatedRoute.paramMap.subscribe((param) => {
       if (!param.has('recipeId')) {
+        this.router.navigate(['/recipe']);
       }
       this.recipe = this.recipeService.getRecipe(
         parseInt(param.get('recipeId'))
       );
+      if (!this.recipe?.id) {
+        this.globalService.toast('Sorry recipe dosent exist');
+        this.router.navigate(['/recipe']);
+      } else {
+        console.log(this.recipe);
+      }
     });
   }
 
   onDelete() {
-    this.alertCtrl
-      .create({
+    this.globalService.popUp(
+      {
         header: 'Are you sure?',
         message: 'Do you really want to delete',
-        buttons: [
-          { text: 'Cancle', role: 'cancle' },
-          {
-            text: 'Delete',
-            handler: () => {
-              this.recipeService.deleteRecipe(this.recipe.id);
-              this.router.navigate(['/recipe']);
-            },
-          },
-        ],
-      })
-      .then((alertEle) => {
-        alertEle.present();
-      });
+        actionButtonText: 'Delete',
+        cancleButtonText: 'Cancle',
+      },
+      () => {
+        this.recipeService.deleteRecipe(this.recipe.id);
+        this.router.navigate(['/recipe']);
+      }
+    );
   }
 }
