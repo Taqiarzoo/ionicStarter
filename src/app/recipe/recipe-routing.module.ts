@@ -6,8 +6,15 @@ import { RecipePage } from './recipe.page';
 const routes: Routes = [
   {
     path: '',
-    component: RecipePage
-  }
+    component: RecipePage,
+  },
+  {
+    path: ':recipeId',
+    loadChildren: () =>
+      import('./recipe-detail/recipe-detail.module').then(
+        (m) => m.RecipeDetailPageModule
+      ),
+  },
 ];
 
 @NgModule({
